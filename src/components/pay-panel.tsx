@@ -78,7 +78,7 @@ export function PayPanel({ charge }: { charge: Charge }) {
 
   if (status.kind === "paid") {
     return (
-      <div className="flex flex-col gap-3 rounded-2xl bg-accent-soft p-5 text-accent" role="status">
+      <div className="flex flex-col gap-3 rounded-2xl bg-forest-soft p-5 text-forest" role="status">
         <p className="flex items-center gap-2 text-base font-semibold">
           <CheckCircle size={22} weight="fill" />
           Pago recibido
@@ -107,7 +107,7 @@ export function PayPanel({ charge }: { charge: Charge }) {
           href={rampUrl(missing, status.account)}
           target="_blank"
           rel="noreferrer"
-          className="flex h-12 items-center justify-center gap-2 rounded-2xl bg-ink text-[15px] font-medium text-white hover:bg-zinc-800"
+          className="flex h-12 items-center justify-center gap-2 rounded-full bg-forest text-[15px] font-medium text-white hover:bg-[#184b3a]"
         >
           Cargar pesos con Ripio <ArrowSquareOut size={18} />
         </a>
@@ -130,7 +130,7 @@ export function PayPanel({ charge }: { charge: Charge }) {
       <button
         onClick={pay}
         disabled={busy}
-        className="flex h-12 items-center justify-center rounded-2xl bg-ink text-[15px] font-medium text-white hover:bg-zinc-800 active:translate-y-px disabled:opacity-60"
+        className="flex h-12 items-center justify-center rounded-full bg-forest text-[15px] font-medium text-white hover:bg-[#184b3a] active:translate-y-px disabled:opacity-60"
       >
         {status.kind === "connecting" && "Conectando wallet…"}
         {status.kind === "signing" && "Confirmá en tu wallet…"}
@@ -145,7 +145,7 @@ export function PayPanel({ charge }: { charge: Charge }) {
         ¿No tenés wARS? Cargalos con Ripio
       </a>
       <p className="flex items-center justify-center gap-2 text-xs text-muted" aria-live="polite">
-        <span className="size-1.5 rounded-full bg-accent" />
+        <span className="size-1.5 rounded-full bg-forest" />
         El agente está esperando el pago en Celo
       </p>
     </div>

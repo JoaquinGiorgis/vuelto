@@ -1,8 +1,21 @@
-# Cuentas Claras
+# Vuelto
+
+<img src="public/mark.png" width="72" alt="Vuelto" />
 
 Agente de cobros en pesos digitales (wARS de Ripio) sobre Celo mainnet. Track: **Stable Agents: LatAm**.
 
 Escribís "Cobrale 18.500 a Martina por el asado", te da un link para WhatsApp, Martina paga en wARS desde MiniPay o MetaMask y el agente concilia la transferencia en la cadena. Sin dólar en el medio.
+
+## Marca
+
+| Token | Hex | Uso |
+| --- | --- | --- |
+| paper | `#F5F3EE` | fondo |
+| ink | `#14201B` | texto |
+| forest | `#1E5B46` | primario |
+| sol | `#F2D25C` | acento |
+
+Logo generado con Nano Banana 2 (fal.ai): una "v" cuyo brazo se enrolla en una moneda, el vuelto que vuelve. Fondo con un shader WebGL propio de ~60 líneas, a media resolución y quieto con `prefers-reduced-motion`.
 
 ## Cómo funciona
 

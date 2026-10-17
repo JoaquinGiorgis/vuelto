@@ -12,7 +12,7 @@ const abi = parseAbi([
 ]);
 
 const pk = process.env.AGENT_PRIVATE_KEY as `0x${string}` | undefined;
-const appUrl = process.env.APP_URL ?? "https://cuentas-claras.vercel.app";
+const appUrl = process.env.APP_URL ?? "https://vuelto.vercel.app";
 const code = process.env.NEXT_PUBLIC_ATTRIBUTION_CODE ?? "celo_test1234";
 if (!pk) throw new Error("Falta AGENT_PRIVATE_KEY");
 
@@ -20,10 +20,10 @@ const account = privateKeyToAccount(pk);
 
 const registration = {
   type: "https://eips.ethereum.org/EIPS/eip-8004#registration-v1",
-  name: "Cuentas Claras",
+  name: "Vuelto",
   description:
     "Agente de cobros en pesos digitales (wARS de Ripio) sobre Celo. Genera links de cobro y concilia el pago onchain.",
-  image: `${appUrl}/icon.png`,
+  image: `${appUrl}/mark.png`,
   services: [{ name: "web", endpoint: appUrl }],
   x402Support: false,
   active: true,

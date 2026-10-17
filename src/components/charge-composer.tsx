@@ -1,14 +1,20 @@
 "use client";
 
-import { ArrowRight, Check, Copy, WhatsappLogo, Wallet } from "@phosphor-icons/react";
+import { ArrowUp, Check, Copy, WhatsappLogo, Wallet } from "@phosphor-icons/react";
 import { useMemo, useState } from "react";
 import { isAddress } from "viem";
 import { publicClient } from "@/lib/celo";
 import { encodeCharge, formatArs, parseIntent } from "@/lib/charge";
 import { connectWallet } from "@/lib/wallet";
 
+const examples = [
+  "Cobrale 18.500 a Martina por el asado",
+  "Cobrale 42.300 a Bruno por la expensa de octubre",
+  "Cobrale 7.250 a Ailén por las entradas",
+];
+
 export function ChargeComposer() {
-  const [text, setText] = useState("Cobrale 18.500 a Martina por el asado");
+  const [text, setText] = useState(examples[0]);
   const [to, setTo] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
@@ -17,6 +23,12 @@ export function ChargeComposer() {
 
   const intent = useMemo(() => parseIntent(text), [text]);
   const addressInvalid = to.length > 0 && !isAddress(to);
+
+  function reset() {
+    setLink(null);
+    setCopied(false);
+    setError(null);
+  }
 
   async function useMyWallet() {
     setError(null);
@@ -28,11 +40,11 @@ export function ChargeComposer() {
     }
   }
 
-  async function createLink(e: React.FormEvent) {
-    e.preventDefault();
+  async function createLink(e?: React.FormEvent) {
+    e?.preventDefault();
     setError(null);
-    if (!intent.amount) return setError("Decinos un monto. Por ejemplo: 18.500.");
-    if (!isAddress(to)) return setError("Necesitamos una wallet de Celo válida para recibir.");
+    if (!intent.amount) return setError("Decime un monto. Por ejemplo: 18.500.");
+    if (!isAddress(to)) return setError("Pegá la wallet de Celo donde querés recibir, o conectá la tuya.");
     setLoading(true);
     try {
       const block = await publicClient.getBlockNumber();
@@ -45,7 +57,7 @@ export function ChargeComposer() {
       });
       setLink(`${window.location.origin}/c/${code}`);
     } catch {
-      setError("No pudimos leer Celo. Probá de nuevo en unos segundos.");
+      setError("No pude leer Celo. Probá de nuevo en unos segundos.");
     } finally {
       setLoading(false);
     }
@@ -62,117 +74,143 @@ export function ChargeComposer() {
     : "";
 
   return (
-    <section className="glass flex min-w-0 flex-col gap-6 rounded-[28px] p-6 sm:p-8">
-      <form onSubmit={createLink} className="flex flex-col gap-6" noValidate>
-        <div className="flex flex-col gap-2">
-          <label htmlFor="intent" className="text-sm font-medium">
-            ¿Qué tenés que cobrar?
-          </label>
-          <textarea
-            id="intent"
-            rows={2}
-            value={text}
-            onChange={(e) => {
-              setText(e.target.value);
-              setLink(null);
-            }}
-            className="resize-none rounded-2xl border border-zinc-200 bg-white/80 px-4 py-3 text-base outline-none focus:border-accent"
-          />
-          <dl className="grid grid-cols-3 gap-2 text-sm" aria-live="polite">
-            <Field label="Monto" value={intent.amount ? `$${formatArs(intent.amount)}` : "—"} mono />
-            <Field label="A quién" value={intent.payer ?? "—"} />
-            <Field label="Por" value={intent.concept ?? "—"} />
-          </dl>
-        </div>
+    <div className="flex flex-col gap-4">
+      <form onSubmit={createLink} noValidate className="glass flex flex-col rounded-[28px] p-2">
+        <label htmlFor="intent" className="sr-only">
+          Qué tenés que cobrar
+        </label>
+        <textarea
+          id="intent"
+          rows={2}
+          value={text}
+          placeholder="Cobrale 18.500 a Martina por el asado"
+          onChange={(e) => {
+            setText(e.target.value);
+            reset();
+          }}
+          onKeyDown={(e) => {
+            if (e.key === "Enter" && !e.shiftKey) {
+              e.preventDefault();
+              createLink();
+            }
+          }}
+          className="resize-none bg-transparent px-4 pt-3 text-lg leading-snug outline-none placeholder:text-muted/60"
+        />
 
-        <div className="flex flex-col gap-2">
-          <label htmlFor="to" className="text-sm font-medium">
+        <dl className="flex flex-wrap gap-1.5 px-4 pb-3 pt-2 text-xs" aria-live="polite">
+          <Token label="Monto" value={intent.amount ? `$${formatArs(intent.amount)}` : null} />
+          <Token label="A" value={intent.payer ?? null} />
+          <Token label="Por" value={intent.concept ?? null} />
+        </dl>
+
+        <div className="flex items-center gap-2 rounded-[22px] bg-white/70 p-1.5">
+          <label htmlFor="to" className="sr-only">
             Tu wallet para recibir
           </label>
-          <div className="flex gap-2">
-            <input
-              id="to"
-              value={to}
-              onChange={(e) => {
-                setTo(e.target.value.trim());
-                setLink(null);
-              }}
-              placeholder="0x…"
-              spellCheck={false}
-              aria-invalid={addressInvalid}
-              aria-describedby="to-help"
-              className="min-w-0 flex-1 rounded-2xl border border-zinc-200 bg-white/80 px-4 py-3 font-mono text-sm outline-none focus:border-accent aria-[invalid=true]:border-red-400"
-            />
-            <button
-              type="button"
-              onClick={useMyWallet}
-              className="glass-pill flex shrink-0 items-center gap-2 rounded-2xl px-4 text-sm font-medium hover:bg-white active:translate-y-px"
-            >
-              <Wallet size={18} weight="regular" />
-              <span className="hidden sm:inline">Usar la mía</span>
-            </button>
-          </div>
-          <p id="to-help" className={`text-xs ${addressInvalid ? "text-red-600" : "text-muted"}`}>
-            {addressInvalid ? "Esa dirección no es válida." : "Ahí llegan los wARS. Funciona con MiniPay o MetaMask."}
-          </p>
-        </div>
-
-        {error && (
-          <p role="alert" className="rounded-2xl bg-red-50 px-4 py-3 text-sm text-red-700">
-            {error}
-          </p>
-        )}
-
-        {!link && (
+          <input
+            id="to"
+            value={to}
+            onChange={(e) => {
+              setTo(e.target.value.trim());
+              reset();
+            }}
+            placeholder="Tu wallet de Celo · 0x…"
+            spellCheck={false}
+            aria-invalid={addressInvalid}
+            className="min-w-0 flex-1 bg-transparent px-3 py-2 font-mono text-[13px] outline-none placeholder:font-sans placeholder:text-muted aria-[invalid=true]:text-red-600"
+          />
+          <button
+            type="button"
+            onClick={useMyWallet}
+            className="flex h-10 shrink-0 items-center gap-1.5 rounded-full border border-line bg-white px-3 text-sm font-medium hover:border-forest/40 active:translate-y-px"
+          >
+            <Wallet size={16} />
+            <span className="hidden sm:inline">Conectar</span>
+          </button>
           <button
             type="submit"
             disabled={loading}
-            className="flex h-12 items-center justify-center gap-2 rounded-2xl bg-ink text-[15px] font-medium text-white hover:bg-zinc-800 active:translate-y-px disabled:opacity-60"
+            aria-label="Crear link de cobro"
+            className="grid size-10 shrink-0 place-items-center rounded-full bg-forest text-white hover:bg-[#184b3a] active:translate-y-px disabled:opacity-50"
           >
-            {loading ? "Creando link…" : "Crear link de cobro"}
-            {!loading && <ArrowRight size={18} />}
+            <ArrowUp size={18} weight="bold" />
           </button>
-        )}
+        </div>
       </form>
 
-      {link && (
-        <div className="flex flex-col gap-3 border-t border-zinc-200/70 pt-6">
-          <p className="text-sm font-medium">Listo. Mandá este link:</p>
-          <p className="truncate rounded-2xl bg-accent-soft px-4 py-3 font-mono text-xs text-accent">
-            {link}
-          </p>
-          <div className="grid grid-cols-2 gap-2">
-            <button
-              onClick={copy}
-              className="glass-pill flex h-11 items-center justify-center gap-2 rounded-2xl text-sm font-medium hover:bg-white active:translate-y-px"
-            >
-              {copied ? <Check size={18} /> : <Copy size={18} />}
-              {copied ? "Copiado" : "Copiar"}
-            </button>
+      {error && (
+        <p role="alert" className="rounded-2xl bg-red-50 px-4 py-3 text-sm text-red-700">
+          {error}
+        </p>
+      )}
+
+      {loading && <div className="h-[140px] rounded-[24px] bg-white/50" aria-label="Creando link" />}
+
+      {link && !loading && (
+        <div className="glass flex flex-col gap-4 rounded-[24px] p-5" role="status">
+          <div className="flex items-start gap-3">
+            <img src="/mark.png" alt="" className="size-7 rounded-lg" />
+            <p className="pt-0.5 text-[15px] leading-relaxed">
+              Listo. Armé un cobro de{" "}
+              <span className="font-mono font-medium">${formatArs(intent.amount)}</span> en wARS
+              {intent.payer ? ` para ${intent.payer}` : ""}. Te aviso acá cuando llegue.
+            </p>
+          </div>
+          <p className="truncate rounded-xl bg-forest-soft px-3 py-2.5 font-mono text-xs text-forest">{link}</p>
+          <div className="grid grid-cols-[1fr_1fr_auto] gap-2">
             <a
               href={`https://wa.me/?text=${encodeURIComponent(shareText)}`}
               target="_blank"
               rel="noreferrer"
-              className="flex h-11 items-center justify-center gap-2 rounded-2xl bg-accent text-sm font-medium text-white hover:opacity-90 active:translate-y-px"
+              className="flex h-11 items-center justify-center gap-2 rounded-full bg-forest text-sm font-medium text-white hover:bg-[#184b3a] active:translate-y-px"
             >
               <WhatsappLogo size={18} />
-              WhatsApp
+              Mandar
+            </a>
+            <button
+              onClick={copy}
+              className="flex h-11 items-center justify-center gap-2 rounded-full border border-line bg-white text-sm font-medium hover:border-forest/40 active:translate-y-px"
+            >
+              {copied ? <Check size={18} /> : <Copy size={18} />}
+              {copied ? "Copiado" : "Copiar"}
+            </button>
+            <a href={link} className="flex h-11 items-center px-3 text-sm text-muted hover:text-ink">
+              Ver
             </a>
           </div>
-          <a href={link} className="text-center text-sm text-muted underline-offset-4 hover:underline">
-            Ver como lo ve quien paga
-          </a>
         </div>
       )}
-    </section>
+
+      {!link && !loading && (
+        <div className="flex flex-wrap justify-center gap-2">
+          {examples.map((ex) => (
+            <button
+              key={ex}
+              type="button"
+              onClick={() => {
+                setText(ex);
+                reset();
+              }}
+              className="glass-pill rounded-full px-3 py-1.5 text-[13px] text-muted hover:text-ink"
+            >
+              {ex}
+            </button>
+          ))}
+        </div>
+      )}
+    </div>
   );
 }
 
-function Field({ label, value, mono }: { label: string; value: string; mono?: boolean }) {
+function Token({ label, value }: { label: string; value: string | null }) {
   return (
-    <div className="min-w-0 rounded-xl bg-white/60 px-3 py-2">
-      <dt className="text-[11px] uppercase tracking-wide text-muted">{label}</dt>
-      <dd className={`truncate ${mono ? "font-mono" : ""}`}>{value}</dd>
+    <div
+      className={`flex min-w-0 items-center gap-1.5 rounded-full px-2.5 py-1 ${
+        value ? "bg-sol-soft text-ink" : "border border-dashed border-line text-muted"
+      }`}
+    >
+      <dt className="text-muted">{label}</dt>
+      <dd className="max-w-[16ch] truncate font-medium">{value ?? "falta"}</dd>
     </div>
   );
 }
