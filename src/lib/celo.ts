@@ -19,7 +19,7 @@ export const transferEvent = parseAbiItem(
 
 // Código ERC-8021 que da Loops House al inscribirse. Sin él no se acredita nada.
 export const ATTRIBUTION_CODE =
-  process.env.NEXT_PUBLIC_ATTRIBUTION_CODE ?? "celo_test1234";
+  process.env.NEXT_PUBLIC_ATTRIBUTION_CODE ?? "celo_1e923cd4c9ff"; // = codeFromRepo("JoaquinGiorgis/vuelto")
 
 export const attributionSuffix = toDataSuffix(ATTRIBUTION_CODE);
 

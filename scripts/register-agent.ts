@@ -13,7 +13,7 @@ const abi = parseAbi([
 
 const pk = process.env.AGENT_PRIVATE_KEY as `0x${string}` | undefined;
 const appUrl = process.env.APP_URL ?? "https://vuelto.vercel.app";
-const code = process.env.NEXT_PUBLIC_ATTRIBUTION_CODE ?? "celo_test1234";
+const code = process.env.NEXT_PUBLIC_ATTRIBUTION_CODE ?? "celo_1e923cd4c9ff"; // = codeFromRepo("JoaquinGiorgis/vuelto")
 if (!pk) throw new Error("Falta AGENT_PRIVATE_KEY");
 
 const account = privateKeyToAccount(pk);
