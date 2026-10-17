@@ -2,6 +2,8 @@
 
 <img src="public/mark.png" width="72" alt="Vuelto" />
 
+**Demo:** https://vuelto-celo.vercel.app
+
 Agente de cobros en pesos digitales (wARS de Ripio) sobre Celo mainnet. Track: **Stable Agents: LatAm**.
 
 Escribís "Cobrale 18.500 a Martina por el asado", te da un link para WhatsApp, Martina paga en wARS desde MiniPay o MetaMask y el agente concilia la transferencia en la cadena. Sin dólar en el medio.

@@ -23,7 +23,7 @@ const steps = [
 
 const log = [
   ["18:02:11", "intent", "cobrar 18.500 ARS · Martina · el asado"],
-  ["18:02:12", "link", "vuelto.app/c/eyJ0byI6IjB4…"],
+  ["18:02:12", "link", "vuelto-celo.vercel.app/c/eyJ0byI6IjB4…"],
   ["18:09:47", "watch", "wARS Transfer → 0x8f3c…21ad"],
   ["18:09:48", "match", "18.500 wARS · bloque 80.356.442"],
   ["18:09:48", "done", "cobro saldado · tag celo_7b3c…"],

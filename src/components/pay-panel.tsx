@@ -22,15 +22,19 @@ export function PayPanel({ charge }: { charge: Charge }) {
   // El agente concilia contra la cadena: sirve aunque paguen desde otra app.
   useEffect(() => {
     if (paid) return;
-    const query = new URLSearchParams({
-      to: charge.to,
-      amount: String(charge.amount),
-      fromBlock: charge.fromBlock,
-    });
+    // Cursor: cada consulta sigue desde el último bloque escaneado.
+    let cursor = charge.fromBlock;
+    let busy = false;
     const check = async () => {
+      if (busy) return;
+      busy = true;
+      const query = new URLSearchParams({ to: charge.to, amount: String(charge.amount), fromBlock: cursor });
       const res = await fetch(`/api/status?${query}`).catch(() => null);
       const data = await res?.json().catch(() => null);
-      if (data?.status === "paid") setStatus({ kind: "paid", txHash: data.txHash });
+      busy = false;
+      if (data?.status === "paid") return setStatus({ kind: "paid", txHash: data.txHash });
+      // Re-escaneamos el último tramo por si el bloque llegó tarde al RPC.
+      if (data?.scannedTo) cursor = String(Math.max(Number(cursor), Number(data.scannedTo) - 20));
     };
     check();
     const id = setInterval(check, 4000);
