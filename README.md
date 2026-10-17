@@ -1,36 +1,43 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Cuentas Claras
 
-## Getting Started
+Agente de cobros en pesos digitales (wARS de Ripio) sobre Celo mainnet. Track: **Stable Agents: LatAm**.
 
-First, run the development server:
+Escribís "Cobrale 18.500 a Martina por el asado", te da un link para WhatsApp, Martina paga en wARS desde MiniPay o MetaMask y el agente concilia la transferencia en la cadena. Sin dólar en el medio.
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+## Cómo funciona
+
+```
+Crear cobro ──► link /c/<cobro>  (el cobro viaja en el link, sin base de datos)
+                     │
+Pagador ─── wallet ──► wARS.transfer(to, monto) + tag ERC-8021 en el calldata
+                     │
+Agente  ─── /api/status ──► lee eventos Transfer de wARS en Celo desde el bloque del cobro
+                     └──► "Pago recibido" + link a Celoscan
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Si al pagador no le alcanza, el agente arma el link de on-ramp de Ripio con el faltante exacto y su wallet.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## Reglas de la hackathon
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+| Regla | Dónde |
+| --- | --- |
+| Celo mainnet (42220) | `src/lib/celo.ts` |
+| Attribution tag ERC-8021 en cada tx | `withAttribution` en `src/lib/wallet.ts`; `dataSuffix` en `scripts/register-agent.ts` |
+| Identidad ERC-8004 | `pnpm register-agent` (Identity Registry `0x8004A169…a432`) |
+| Verificar el tag | `pnpm verify-tag <hash>` |
 
-## Learn More
+El gas lo paga cada wallet. No hay relayer.
 
-To learn more about Next.js, take a look at the following resources:
+## Correrlo
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+```bash
+pnpm install
+cp .env.example .env.local   # poné tu NEXT_PUBLIC_ATTRIBUTION_CODE
+pnpm dev
+```
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+## Próximos pasos
 
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+- Pasar el parser de intención a un agente eve con LLM y canal de WhatsApp.
+- Recordatorios automáticos a quien no pagó (schedule).
+- Dividir gastos entre varias personas, en wARS o wBRL.
